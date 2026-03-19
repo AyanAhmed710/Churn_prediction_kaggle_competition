@@ -1,9 +1,9 @@
 pandas
-os
 numpy
 scikit-learn
 matplotlib
 seaborn
 certifi
 pymongo 
--e .
+dotenv
+# -e .

@@ -1,6 +1,6 @@
 import sys
 
-class CustomException(Exception):
+class ChurnPredictionException(Exception):
     def __init__(self, error_message, error_detail: sys):
         self.error_message=error_message
         _ ,_ , exc_tb=error_detail.exc_info()
