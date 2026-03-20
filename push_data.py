@@ -12,7 +12,7 @@ load_dotenv()
 
 DATABASE_NAME="churn_prediction"
 COLLECTION_NAME="customer_churn_data"  
-DATA_PATH=r"D:\MLOPS\Churn_Prediction\Churn_prediction_kaggle_competition\churn_data\train.csv"
+DATA_PATH=r"D:\MLOPS\Churn_Prediction\Churn_prediction_kaggle_competition\churn_data\churn.csv"
 
 
 class MongoDBClient:
