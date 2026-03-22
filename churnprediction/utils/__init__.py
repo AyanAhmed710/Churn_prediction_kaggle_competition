@@ -41,3 +41,18 @@ def save_object(file_path ,object):
             pickle.dump(object, file_obj)
     except Exception as e:
         raise ChurnPredictionException(e, sys)
+    
+
+def load_object(file_path):
+    try:
+        with open(file_path, "rb") as file_obj:
+            return pickle.load(file_obj)
+    except Exception as e:
+        raise ChurnPredictionException(e, sys)
+    
+
+def read_numpy_array(data_path):
+    try:
+        return np.load(data_path)
+    except Exception as e:
+        raise ChurnPredictionException(e, sys)

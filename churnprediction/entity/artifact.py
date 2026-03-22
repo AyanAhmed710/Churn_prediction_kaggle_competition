@@ -24,3 +24,19 @@ class DataTransformationArtifact:
     transformed_train_file_path: str
     transformed_test_file_path: str
     transformed_object_file_path: str
+
+
+@dataclass
+class ClassificationArtifact:
+    f1_score: float
+    recall :float
+    precision :float
+    roc_auc :float
+
+
+@dataclass 
+class ModelTrainerArtifact:
+    model_file_path: str
+    train_artifact :ClassificationArtifact
+    test_artifact :ClassificationArtifact
+    

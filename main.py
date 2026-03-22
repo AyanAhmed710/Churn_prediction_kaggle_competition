@@ -2,9 +2,10 @@ import os
 import pandas as pd
 from churnprediction.components.data_validation import DataValidation
 from churnprediction.components.data_transformation import DataTransformation
-from churnprediction.entity.artifact import DataIngestionArtifact ,DataValidationArtifact
+from churnprediction.components.model_trainer import ModelTrainer
+from churnprediction.entity.artifact import DataIngestionArtifact ,DataValidationArtifact ,ModelTrainerArtifact
 from churnprediction.components.data_ingestion import DataIngestion
-from churnprediction.entity.config_entity import TrainingPipelineConfig, DataIngestionConfig ,DataValidationConfig ,DataTransformationConfig
+from churnprediction.entity.config_entity import TrainingPipelineConfig, DataIngestionConfig ,DataValidationConfig ,DataTransformationConfig ,ModelTrainingConfig
 from churnprediction.logging.logger import get_logger
 from dotenv import load_dotenv
 load_dotenv()
@@ -30,3 +31,10 @@ if __name__ == "__main__":
     data_transformation = DataTransformation(data_transformation_config=data_transformation_config, data_ingestion_artifact=data_ingestion_artifact)
     data_transformation_artifact = data_transformation.initiate_data_transformation()
     
+
+    main_logger.info("Starting model trainer process")
+    model_trainer_config = ModelTrainingConfig(training_pipeline_config=training_pipeline_config)
+    model_trainer = ModelTrainer(model_trainer_config=model_trainer_config, data_transformation_artifact=data_transformation_artifact)
+    model_trainer_artifact = model_trainer.initialize_model_training()
+    main_logger.info(f"Model trainer artifact: {model_trainer_artifact}")
+    main_logger.info("Model trainer completed successfully.")

@@ -55,3 +55,11 @@ BINARY_YES_NO_COLS = [
 ]
 
 
+#Define Constants for Model Training
+
+MODEL_TRAINER_DIR_NAME="model_trainer"
+MODEL_TRAINER_TRAINED_MODEL_DIR="trained_model"
+MODEL_TRAINING_REPORT ="report.yaml"
+MODEL_TRAINER_TRAINED_MODEL_NAME="model.pkl"
+
+
