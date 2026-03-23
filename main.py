@@ -1,4 +1,24 @@
 import os
+import dagshub
+import sys
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+# Only set if not already defined in the environment (EC2 will have these pre-set)
+if os.environ.get("DAGSHUB_USERNAME") and os.environ.get("DAGSHUB_TOKEN"):
+    os.environ["MLFLOW_TRACKING_USERNAME"] = os.environ["DAGSHUB_USERNAME"]
+    os.environ["MLFLOW_TRACKING_PASSWORD"] = os.environ["DAGSHUB_TOKEN"]
+
+dagshub.init(repo_owner='sheikhayanahmad710', repo_name='Churn_prediction_kaggle_competition', mlflow=True)
+import io
+
+# Fix Windows cp1252 encoding issue with MLflow emoji output
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
+
+import os
 import pandas as pd
 from churnprediction.components.data_validation import DataValidation
 from churnprediction.components.data_transformation import DataTransformation
@@ -8,7 +28,7 @@ from churnprediction.components.data_ingestion import DataIngestion
 from churnprediction.entity.config_entity import TrainingPipelineConfig, DataIngestionConfig ,DataValidationConfig ,DataTransformationConfig ,ModelTrainingConfig
 from churnprediction.logging.logger import get_logger
 from dotenv import load_dotenv
-load_dotenv()
+
 main_logger = get_logger("main")
 
 

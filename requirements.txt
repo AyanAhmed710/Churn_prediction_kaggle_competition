@@ -6,4 +6,6 @@ seaborn
 certifi
 pymongo 
 dotenv
+mlflow
+dagshub
 # -e .
