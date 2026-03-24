@@ -7,11 +7,12 @@ from churnprediction.constants import training_pipeline
 class TrainingPipelineConfig:
     def __init__(self ,timestamp=datetime.now()):
 
-            self.timestamp = timestamp.strftime("%Y%m%d%H%M%S")
+            self.timestamp = timestamp.strftime("%Y-%m-%d-%H-%M-%S")
             self.pipeline_name = training_pipeline.PIPELINE_NAME
             self.artifact_dir = os.path.join(training_pipeline.ARTIFACT_NAME, self.timestamp)
             self.pipeline_name = training_pipeline.PIPELINE_NAME
-            self.timestamp = timestamp
+            self.model_dir =os.path.join('Final_Model')
+        #     self.timestamp = timestamp
 
 class DataIngestionConfig:
     def __init__(self, training_pipeline_config: TrainingPipelineConfig):

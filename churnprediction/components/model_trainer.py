@@ -144,20 +144,20 @@ class ModelTrainer:
         os.makedirs(os.path.dirname(self.model_trainer_config.report_file_path), exist_ok=True)
 
         models = {
-            "LogisticRegression":     LogisticRegression(),
-            "RandomForestClassifier": RandomForestClassifier(),
+            "LogisticRegression":     LogisticRegression()
         }
+            
 
         params = {
             "LogisticRegression": {
                 "solver":  ["liblinear"],
-                "penalty": ["l1", "l2"],
-                "C":       [0.1, 1, 10],
+                "penalty": ["l2"],
+                "C":       [ 10]
             },
-            "RandomForestClassifier": {
-                "n_estimators": [10, 50, 100],
-                "criterion":    ["gini", "entropy"],
-            },
+            # "RandomForestClassifier": {
+            #     "n_estimators": [10, 50, 100],
+            #     "criterion":    ["gini", "entropy"],
+            # },
         }
 
         report, trained_models = evaluate_model(X_train, Y_train, X_test, Y_test, models, params)

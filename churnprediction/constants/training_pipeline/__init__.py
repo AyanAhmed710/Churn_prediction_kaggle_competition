@@ -62,4 +62,11 @@ MODEL_TRAINER_TRAINED_MODEL_DIR="trained_model"
 MODEL_TRAINING_REPORT ="report.yaml"
 MODEL_TRAINER_TRAINED_MODEL_NAME="model.pkl"
 
+FINAL_PUSHED_MODEL_PATH=r"D:\MLOPS\Churn_Prediction\Churn_prediction_kaggle_competition\Final_Model\model.pkl"
+
+FINAL_PUSHED_PREPROCESSOR_PATH=r"D:\MLOPS\Churn_Prediction\Churn_prediction_kaggle_competition\Final_Model\preprocessor.pkl"
+
+BUCKET_NAME="churnprediction123"
+
+
 

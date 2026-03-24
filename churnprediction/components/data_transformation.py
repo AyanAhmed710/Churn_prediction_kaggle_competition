@@ -4,7 +4,7 @@ import numpy as np
 from churnprediction.exception.exception import ChurnPredictionException
 from churnprediction.logging.logger import get_logger
 from churnprediction.entity.config_entity import DataTransformationConfig
-from churnprediction.entity.artifact import DataIngestionArtifact , DataTransformationArtifact
+from churnprediction.entity.artifact import DataValidationArtifact , DataTransformationArtifact
 from churnprediction.utils import save_numpy ,save_object
 from churnprediction.constants.training_pipeline import TARGET_COLUMN ,SMOTE_PARAMERTERS ,INTERNET_SERVICE_COLS ,BINARY_YES_NO_COLS
 from sklearn.impute import SimpleImputer
@@ -19,10 +19,10 @@ import sys
 data_transformation_logger = get_logger("data_transformation")
 
 class DataTransformation:
-    def __init__(self, data_transformation_config: DataTransformationConfig, data_ingestion_artifact: DataIngestionArtifact):
+    def __init__(self, data_transformation_config: DataTransformationConfig, data_validation_artifact: DataValidationArtifact):
         try:
             self.data_transformation_config :DataTransformationConfig = data_transformation_config
-            self.data_ingestion_artifact :DataIngestionArtifact= data_ingestion_artifact
+            self.data_validation_artifact :DataValidationArtifact = data_validation_artifact
         except Exception as e:
             raise ChurnPredictionException(e, sys)
         
@@ -100,8 +100,8 @@ class DataTransformation:
     def initiate_data_transformation(self):
         try:
             data_transformation_logger.info("Starting data transformation process")
-            train_df = self.read_data(self.data_ingestion_artifact.train_file_path)
-            test_df = self.read_data(self.data_ingestion_artifact.test_file_path)
+            train_df = self.read_data(self.data_validation_artifact.valid_train_file_path)
+            test_df = self.read_data(self.data_validation_artifact.valid_test_file_path)
             train_df.drop(columns=["_id", "id"], inplace=True)
             test_df.drop(columns=["_id", "id"], inplace=True)
 
