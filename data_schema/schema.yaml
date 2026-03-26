@@ -1,5 +1,4 @@
 columns:
-  _id: object
   id: int64
   gender: object
   SeniorCitizen: int64

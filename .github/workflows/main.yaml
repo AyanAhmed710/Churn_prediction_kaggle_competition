@@ -20,8 +20,8 @@ jobs:
       - name: Lint Code
         run: echo "Linting repository"
 
-      - name:  Run unit tests
-        run:   echo "Running unit tests"
+      - name: Run unit tests
+        run: echo "Running unit tests"
 
   build-and-push-ecr-image:
     name: Continuous Delivery
@@ -32,9 +32,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install Utitlities
+      - name: Install Utilities
         run: |
-          echo "Installing utitlities"
           sudo apt-get update
           sudo apt-get install -y jq unzip
 
@@ -49,8 +48,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-
-
       - name: Build, Tag and Push image to Amazon ECR
         id: build-image
         env:
@@ -58,6 +55,52 @@ jobs:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
           IMAGE_TAG: latest
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build --no-cache -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+  deploy-to-ec2:
+    name: Continuous Deployment
+    needs: build-and-push-ecr-image
+    runs-on: self-hosted        # <-- Runs directly on your EC2 instance
+    
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Pull latest image from ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: latest
+        run: |
+          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Stop and remove existing container
+        run: |
+          docker stop my-app || true
+          docker rm my-app || true
+
+      - name: Run new container
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: latest
+        run: |
+          docker run -d \
+            --name my-app \
+            -p 80:8000 \
+            --restart always \
+            $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Clean up old Docker images
+        run: |
+          docker image prune -f

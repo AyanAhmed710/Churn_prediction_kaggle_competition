@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Churn Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --border: #1e1e2e;
+            --accent: #00e5ff;
+            --accent2: #7c3aed;
+            --text: #e2e8f0;
+            --muted: #64748b;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 4rem 1rem;
+            overflow-y: auto;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+
+        /* Glowing orbs */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            animation: pulse 8s ease-in-out infinite;
+        }
+        .orb-1 {
+            width: 400px; height: 400px;
+            background: rgba(0, 229, 255, 0.08);
+            top: -100px; right: -100px;
+        }
+        .orb-2 {
+            width: 300px; height: 300px;
+            background: rgba(124, 58, 237, 0.1);
+            bottom: -50px; left: -50px;
+            animation-delay: -4s;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 0.65rem;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            color: var(--accent);
+            border: 1px solid rgba(0,229,255,0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 100px;
+            margin-bottom: 2rem;
+            animation: fadeDown 0.6s ease both;
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.05;
+            margin-bottom: 1rem;
+            animation: fadeDown 0.6s ease 0.1s both;
+        }
+
+        h1 span {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 0.9rem;
+            margin-bottom: 3.5rem;
+            line-height: 1.7;
+            animation: fadeDown 0.6s ease 0.2s both;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            animation: fadeDown 0.6s ease 0.3s both;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2.5rem 2rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(0,229,255,0.05), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover::before { opacity: 1; }
+
+        .card:hover {
+            border-color: rgba(0,229,255,0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(0,229,255,0.1);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1.2rem;
+            display: block;
+        }
+
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+        }
+
+        .card-desc {
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .card-arrow {
+            display: inline-block;
+            margin-top: 1.5rem;
+            font-size: 0.75rem;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+        }
+
+        .card-2:hover {
+            border-color: rgba(124,58,237,0.4);
+            box-shadow: 0 20px 60px rgba(124,58,237,0.1);
+        }
+
+        .card-2::before {
+            background: linear-gradient(135deg, rgba(124,58,237,0.05), transparent);
+        }
+
+        .card-2 .card-arrow { color: var(--accent2); }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer {
+            margin-top: 3rem;
+            font-size: 0.7rem;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            animation: fadeDown 0.6s ease 0.4s both;
+        }
+
+        @media (max-width: 600px) {
+            .cards { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="container">
+        <div class="badge">⚡ ML Prediction System</div>
+        
+        <h1>Customer <span>Churn</span><br>Prediction</h1>
+        
+        <p class="subtitle">
+            Identify at-risk customers before they leave.<br>
+            Single predictions or bulk batch processing — your choice.
+        </p>
+
+        <div class="cards">
+            <a href="/predict" class="card">
+                <span class="card-icon">🎯</span>
+                <div class="card-title">Single Predict</div>
+                <div class="card-desc">Manually enter customer details and get an instant churn prediction with confidence score.</div>
+                <div class="card-arrow">Enter manually →</div>
+            </a>
+
+            <a href="/predict-batch" class="card card-2">
+                <span class="card-icon">📂</span>
+                <div class="card-title">Batch Predict</div>
+                <div class="card-desc">Upload a CSV file with multiple customers and download predictions for all of them at once.</div>
+                <div class="card-arrow">Upload CSV →</div>
+            </a>
+        </div>
+
+        <div class="footer">CHURN PREDICTION ENGINE &nbsp;·&nbsp; POWERED BY ML</div>
+    </div>
+</body>
+</html>

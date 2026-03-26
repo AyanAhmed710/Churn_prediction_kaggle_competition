@@ -38,7 +38,7 @@ if __name__ == "__main__":
     # data_ingestion = DataIngestion(data_ingestion_config=data_ingestion_config)
     # data_ingestion_artifact = data_ingestion.initiate_data_ingestion()
 
-    data_ingestion_artifact = DataIngestionArtifact(feature_store_file_path=r"D:\MLOPS\Churn_Prediction\Churn_prediction_kaggle_competition\Artifact\20260320005439\data_ingestion\feature_store\churn.csv"   ,train_file_path=r"D:\MLOPS\Churn_Prediction\Churn_prediction_kaggle_competition\Artifact\20260320005439\data_ingestion\ingested\train.csv", test_file_path=r"D:\MLOPS\Churn_Prediction\Churn_prediction_kaggle_competition\Artifact\20260320005439\data_ingestion\ingested\test.csv")
+    data_ingestion_artifact = DataIngestionArtifact(feature_store_file_path=r"D:\MLOPS\Churn_Prediction\Churn_prediction_kaggle_competition\Artifact\2026-03-26-16-38-33\data_ingestion\feature_store"   ,train_file_path=r"D:\MLOPS\Churn_Prediction\Churn_prediction_kaggle_competition\Artifact\2026-03-26-16-38-33\data_ingestion\ingested\train.csv", test_file_path=r"D:\MLOPS\Churn_Prediction\Churn_prediction_kaggle_competition\Artifact\2026-03-26-16-38-33\data_ingestion\ingested\test.csv")
 
     data_validation_config = DataValidationConfig(training_pipeline_config=training_pipeline_config)
     data_validation = DataValidation(data_validation_config=data_validation_config, data_ingestion_artifact=data_ingestion_artifact)
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     main_logger.info("Starting data transformation process")
     data_transformation_config = DataTransformationConfig(training_pipeline_config=training_pipeline_config)
-    data_transformation = DataTransformation(data_transformation_config=data_transformation_config, data_ingestion_artifact=data_ingestion_artifact)
+    data_transformation = DataTransformation(data_transformation_config=data_transformation_config, data_validation_artifact=data_validation_artifact)
     data_transformation_artifact = data_transformation.initiate_data_transformation()
     
 

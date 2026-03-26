@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Prediction</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0f;
+            --surface: #12121a;
+            --surface2: #1a1a26;
+            --border: #1e1e2e;
+            --accent: #7c3aed;
+            --accent-light: rgba(124,58,237,0.15);
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'DM Mono', monospace;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(124,58,237,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(124,58,237,0.02) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            max-width: 700px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .back-btn:hover {
+            color: var(--accent);
+            border-color: rgba(124,58,237,0.4);
+        }
+
+        .page-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .wrapper {
+            max-width: 700px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .upload-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+        }
+
+        .upload-icon { font-size: 3rem; margin-bottom: 1rem; }
+
+        .upload-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-sub {
+            font-size: 0.78rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 14px;
+            padding: 3rem 2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: rgba(124,58,237,0.5);
+            background: var(--accent-light);
+        }
+
+        .drop-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .drop-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+
+        .drop-text {
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .drop-text span {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .file-selected {
+            display: none;
+            align-items: center;
+            gap: 0.8rem;
+            background: var(--accent-light);
+            border: 1px solid rgba(124,58,237,0.3);
+            border-radius: 10px;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.8rem;
+        }
+
+        .file-selected.show { display: flex; }
+        .file-name { flex: 1; text-align: left; }
+        .file-remove { cursor: pointer; color: var(--muted); font-size: 1rem; }
+        .file-remove:hover { color: #ef4444; }
+
+        .submit-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--accent), #9f50ff);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-family: 'Syne', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(124,58,237,0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Schema hint */
+        .schema {
+            margin-top: 2rem;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.2rem 1.5rem;
+            text-align: left;
+        }
+
+        .schema-title {
+            font-size: 0.65rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 0.8rem;
+        }
+
+        .schema-cols {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .schema-col {
+            font-size: 0.68rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 0.25rem 0.6rem;
+            border-radius: 5px;
+            color: var(--muted);
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            padding: 2rem;
+        }
+
+        .loading.show { display: flex; }
+
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-text { font-size: 0.8rem; color: var(--muted); }
+
+        /* Results table */
+        .results {
+            display: none;
+            margin-top: 2rem;
+        }
+
+        .results.show { display: block; }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .results-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+        }
+
+        .download-btn {
+            font-size: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: rgba(16,185,129,0.15);
+            border: 1px solid rgba(16,185,129,0.3);
+            border-radius: 8px;
+            color: var(--success);
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .download-btn:hover { background: rgba(16,185,129,0.25); }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+
+        th {
+            background: var(--surface2);
+            padding: 0.7rem 1rem;
+            text-align: left;
+            color: var(--muted);
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        tr:last-child td { border-bottom: none; }
+
+        tr:hover td { background: var(--surface2); }
+
+        .churn-yes {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        .churn-no {
+            color: var(--success);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <a href="/" class="back-btn">← Back</a>
+        <div class="page-title">📂 Batch Prediction</div>
+    </div>
+
+    <div class="wrapper">
+        <div class="upload-card">
+            <div class="upload-icon">📊</div>
+            <div class="upload-title">Upload Customer CSV</div>
+            <div class="upload-sub">Upload a CSV file with customer data to get<br>churn predictions for all entries at once.</div>
+
+            <div class="drop-zone" id="dropZone">
+                <input type="file" id="fileInput" accept=".csv">
+                <div class="drop-icon">☁️</div>
+                <div class="drop-text">Drop your CSV here or <span>browse files</span></div>
+            </div>
+
+            <div class="file-selected" id="fileSelected">
+                <span>📄</span>
+                <span class="file-name" id="fileName"></span>
+                <span class="file-remove" id="fileRemove">✕</span>
+            </div>
+
+            <button class="submit-btn" id="submitBtn" disabled onclick="submitFile()">
+                📂 Upload & Predict
+            </button>
+
+            <div class="schema">
+                <div class="schema-title">Required CSV Columns</div>
+                <div class="schema-cols">
+                    <span class="schema-col">gender</span>
+                    <span class="schema-col">SeniorCitizen</span>
+                    <span class="schema-col">Partner</span>
+                    <span class="schema-col">Dependents</span>
+                    <span class="schema-col">tenure</span>
+                    <span class="schema-col">PhoneService</span>
+                    <span class="schema-col">MultipleLines</span>
+                    <span class="schema-col">InternetService</span>
+                    <span class="schema-col">OnlineSecurity</span>
+                    <span class="schema-col">OnlineBackup</span>
+                    <span class="schema-col">DeviceProtection</span>
+                    <span class="schema-col">TechSupport</span>
+                    <span class="schema-col">StreamingTV</span>
+                    <span class="schema-col">StreamingMovies</span>
+                    <span class="schema-col">Contract</span>
+                    <span class="schema-col">PaperlessBilling</span>
+                    <span class="schema-col">PaymentMethod</span>
+                    <span class="schema-col">MonthlyCharges</span>
+                    <span class="schema-col">TotalCharges</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div class="loading-text">Processing predictions...</div>
+        </div>
+
+        <div class="results" id="results">
+            <div class="results-header">
+                <div class="results-title">Prediction Results</div>
+                <a class="download-btn" id="downloadBtn" href="/download-output">⬇ Download CSV</a>
+            </div>
+            <div class="table-wrap">
+                <table id="resultsTable">
+                    <thead id="tableHead"></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const fileSelected = document.getElementById('fileSelected');
+        const fileName = document.getElementById('fileName');
+        const fileRemove = document.getElementById('fileRemove');
+        const submitBtn = document.getElementById('submitBtn');
+
+        fileInput.addEventListener('change', function() {
+            if (this.files[0]) setFile(this.files[0]);
+        });
+
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files[0]) setFile(e.dataTransfer.files[0]);
+        });
+
+        function setFile(file) {
+            fileName.textContent = file.name;
+            fileSelected.classList.add('show');
+            submitBtn.disabled = false;
+        }
+
+        fileRemove.addEventListener('click', () => {
+            fileInput.value = '';
+            fileSelected.classList.remove('show');
+            submitBtn.disabled = true;
+        });
+
+        async function submitFile() {
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('results').classList.remove('show');
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch('/predict-batch', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                document.getElementById('loading').classList.remove('show');
+
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                // Build table
+                const head = document.getElementById('tableHead');
+                const body = document.getElementById('tableBody');
+                head.innerHTML = '';
+                body.innerHTML = '';
+
+                const cols = Object.keys(data.results[0]);
+                head.innerHTML = '<tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr>';
+
+                data.results.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = cols.map(c => {
+                        if (c === 'predicted_churn') {
+                            const isChurn = row[c] == 1 || row[c] === 'Yes';
+                            return `<td class="${isChurn ? 'churn-yes' : 'churn-no'}">${isChurn ? '⚠ Yes' : '✓ No'}</td>`;
+                        }
+                        return `<td>${row[c]}</td>`;
+                    }).join('');
+                    body.appendChild(tr);
+                });
+
+                document.getElementById('results').classList.add('show');
+                submitBtn.disabled = false;
+
+            } catch (err) {
+                document.getElementById('loading').classList.remove('show');
+                alert('Error: ' + err.message);
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

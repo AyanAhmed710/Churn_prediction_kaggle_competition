@@ -1,25 +1,21 @@
 from setuptools import setup ,find_packages
+from typing import List
 
 requirement_lst = []
 
-def get_requirements():
+def get_requirements() -> List[str]:
+    try: 
+        requirements_lst = []
+        with open('requirements.txt', 'r') as f:
+            for line in f.readlines():
+                line = line.strip()  # ← assign it back
+                if line and line != '-e .':
+                    requirements_lst.append(line)
 
+    except FileNotFoundError:
+        print("Requirements file not found.")
 
-    try:
-      with open('requirements.txt') as f:
-        
-        for line in f.readlines():
-            line.strip()
-
-            if line and line != '-e .':
-                requirement_lst.append(line)
-
-
-    except FileNotFoundError :
-       print('requirements.txt file not found')
-
-
-    return requirement_lst
+    return requirements_lst
 
 setup(
     name='churn_prediction',
