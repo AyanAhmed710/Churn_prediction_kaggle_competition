@@ -129,7 +129,7 @@ async def predict_batch(file: UploadFile = File(...)):
 
         df.drop(columns=["id"],inplace=True)
  
-        model_path = os.path.join(BASE_DIR, "final_Model", "model.pkl")
+        model_path = os.path.join(BASE_DIR, "Final_Model", "model.pkl")
         model = load_object(model_path)
  
         y_pred = model.predict_new(df)
